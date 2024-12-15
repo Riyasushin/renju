@@ -68,7 +68,7 @@ private:
 
     void paintEvent(QPaintEvent *event);
     void mouseMoveEvent(QMouseEvent *event);
-    void mousePressEvent(QMouseEvent *event);
+    void mouseReleaseEvent(QMouseEvent *event);
     void closeEvent(QCloseEvent *event);
     void saveFile();
     QPainter *painter;
@@ -82,6 +82,10 @@ private:
      */
     std::pair<size_t, size_t> getPointAbsLocation(int mouseX, int mouseY);
 
+    struct {
+        int x, y; // 鼠标现在处于的位置
+        game::Chessquer type; /// 可以为白色、黑色、不合法
+    } nextMove;
 
     /**
      * @brief isSaved 状态量，目前棋盘中的数据和文件中数据不同就变成false

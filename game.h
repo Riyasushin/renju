@@ -34,7 +34,8 @@ public:
     enum Chessquer {
         white,
         black,
-        non
+        non,
+        invalid
     };
 
     /// maybe private

@@ -10,6 +10,8 @@ Board::Board(QWidget *parent)
     ui->setupUi(this);
     this->setWindowTitle("五子棋");
 
+    Board::nextMove = {-1, -1, game::Chessquer::non};
+
     /// START THE GAME
     Game = new game;
 
@@ -57,6 +59,20 @@ void Board::paintEvent(QPaintEvent *event){
     }
 
     /// TODO 画虚拟的棋子
+    if (Board::nextMove.x != -1) {
+        switch(Board::nextMove.type) {
+        case game::Chessquer::black:
+            painter->setBrush(QBrush(Qt::black, Qt::SolidPattern));
+            break;
+        case game::Chessquer::white:
+            painter->setBrush(QBrush(Qt::white, Qt::SolidPattern));
+            break;
+        case game::Chessquer::invalid:
+            painter->setBrush(QBrush(Qt::red, Qt::SolidPattern));
+            break;
+        }
+        painter->drawEllipse(x + WIDTH * Board::nextMove.x - R / 2, y + WIDTH * Board::nextMove.y - R / 2, R, R);
+    }
 
     painter->end();
 }
@@ -65,19 +81,45 @@ void Board::paintEvent(QPaintEvent *event){
 /// 判断鼠标移动，预先画
 /// TODO
 void Board::mouseMoveEvent(QMouseEvent *event) {
-    QPoint pos = event->pos();
-    /// around the board ,in play
-    //if (mouseX >= MARGEIN / 2 && mouseX <= MARGEIN + WIDTH * LINE + MARGEIN / 2
-    //    && mouseY >= MARGEIN / 2 && mouseY <= MARGEIN + WIDTH * LINE + MARGEIN / 2) {
 
-        qDebug() << "mouse move:" << pos.x() << " " << pos.y();
+    if (Game->hasDecideWinner()) {
+        Board::nextMove.x = -1;
+        Board::nextMove.y = -1;
+        return;
+    }
 
-    //}
+    int mouseX = event->x(), mouseY = event->y();
+
+    if (mouseX >= MARGEIN / 2 && mouseX <= MARGEIN + WIDTH * LINE + MARGEIN / 2
+        && mouseY >= MARGEIN / 2 && mouseY <= MARGEIN + WIDTH * LINE + MARGEIN / 2) {
+
+        qDebug() << mouseX << " " << mouseY;
+        auto [absX, absY] = Board::getPointAbsLocation(mouseX, mouseY);
+
+        bool canMove = Game->canMakeMove(absX, absY);
+
+        if (canMove) {
+            /// 能下棋，写成可行的
+            /// 已经排除了棋局结束的情况，所有只有白瞎或黑瞎的情况
+            Board::nextMove.type = (Game->getGameState() == game::gameState::whiteToD ? game::Chessquer::white : game::Chessquer::black);
+
+        } else {
+            /// 不能下棋,写成红色的叉号
+            Board::nextMove.type = game::Chessquer::invalid;
+        }
+
+        Board::nextMove.x = absX;
+        Board::nextMove.y = absY;
+
+        update();
+
+    }
+
 
 }
 
 /// 鼠标释放，画实心的
-void Board::mousePressEvent(QMouseEvent *event) {
+void Board::mouseReleaseEvent(QMouseEvent *event) {
 
     if (Game->hasDecideWinner())
         return;
@@ -95,7 +137,7 @@ void Board::mousePressEvent(QMouseEvent *event) {
         bool canMove = Game->canMakeMove(absX, absY);
         if (canMove) {
 
-
+            Board::nextMove = {-1, -1, game::Chessquer::non};
             Game->MakeMoveHelper(absX, absY);
             Board::NotSave();
 
