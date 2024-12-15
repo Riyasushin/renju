@@ -1,0 +1,3 @@
+D:/WORK_PLACE/Renju_AI/cmake-build-debug/CMakeFiles/Renju_AI.dir
+D:/WORK_PLACE/Renju_AI/cmake-build-debug/CMakeFiles/edit_cache.dir
+D:/WORK_PLACE/Renju_AI/cmake-build-debug/CMakeFiles/rebuild_cache.dir
