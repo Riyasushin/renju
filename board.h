@@ -15,6 +15,7 @@
 #include "game.h"
 #include "ut-files.h"
 #include <stdio.h>
+#include "chessengine.h"
 
 /// 棋盘界面
 
@@ -120,10 +121,14 @@ private:
 
 
 /**
- *
- * AI相关操作！！！
+ * AI相关操作
  */
 private:
+    bool isPVE = false;
+public:
+    enum Mode{ComputerBlack = 1, ComputerWhite = 0};
+    Mode AIMode;
+    void useAIMode(const Board::Mode mode);
 
 
 signals:

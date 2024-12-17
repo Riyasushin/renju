@@ -98,6 +98,7 @@ void Board::mouseMoveEvent(QMouseEvent *event) {
 
         bool canMove = Game->canMakeMove(absX, absY);
 
+        /// TODO bug!!!
         if (canMove) {
             /// 能下棋，写成可行的
             /// 已经排除了棋局结束的情况，所有只有白瞎或黑瞎的情况
@@ -141,6 +142,27 @@ void Board::mouseReleaseEvent(QMouseEvent *event) {
             Game->MakeMoveHelper(absX, absY);
             Board::NotSave();
 
+            /// 文本修改，提示轮到谁下
+            QString stateT;
+            switch (Game->getGameState()) {
+            case game::gameState::blackToD:
+                stateT = (Board::isPVE ? (Board::AIMode == Board::Mode::ComputerBlack ? "人机下" : "该你了")  : "轮到黑子");
+                break;
+            case game::gameState::whiteToD:
+                stateT = (Board::isPVE ? (Board::AIMode == Board::Mode::ComputerWhite? "人机下" : "该你了")  : "轮到白子");
+                break;
+              case game::gameState::whiteWin:
+                stateT = (Board::isPVE ? (Board::AIMode == Board::Mode::ComputerWhite ? "人机赢了" : "你赢了") :"白子胜利");
+                break;
+               case game::gameState::blackWin:
+                stateT = (Board::isPVE ? (Board::AIMode == Board::Mode::ComputerBlack ? "人机赢了" : "你赢了") :"黑子胜利");
+                break;
+           default:
+                stateT = "出BUG了！";
+                break;
+            }
+            Board::ui->label->setText(stateT);
+
             update();
 
             if (Game->hasDecideWinner()) {
@@ -149,34 +171,79 @@ void Board::mouseReleaseEvent(QMouseEvent *event) {
                 QString title = "CONGRATULATION!!!";
                 game::Chessquer winner = Game->Winner();
                 if (winner == game::Chessquer::white) {
-                    //// TODO 人机时提示不一样的支付
-                    winnertr = "白子胜";
+                    if (Board::isPVE) {
+                        /// TODO
+                        winnertr = (Board::AIMode == Board::Mode::ComputerWhite ? "你赢了" : "你输了");
+                    } else {
+                        winnertr = "白子胜";
+                    }
                 } else if (winner == game::Chessquer::black){
-                    winnertr = "黑子胜";
+                    if (Board::isPVE) {
+                        winnertr = (Board::AIMode == Board::Mode::ComputerBlack? "你赢了" : "你输了");
+                    } else {
+                        winnertr = "黑子胜";
+                    }
                 }
                 QMessageBox::information(this, title, winnertr, QMessageBox::Ok, QMessageBox::NoButton);
+            } else {
+                /// 还可以继续挣扎
+
+                if (Board::isPVE) {
+                    /// 装模作样暂停一秒 TODO
+
+
+                    ChessEngine::nextStep(absX, absY);
+
+                    ChessEngine::Position p = ChessEngine::getLastPosition();
+
+                    /// TODO 复制粘贴不好
+                    Game->MakeMoveHelper(p.x, p.y);
+
+                    if (Game->hasDecideWinner()) {
+                        //// todo 有BUG
+                        QString winnertr;
+                        QString title = "CONGRATULATION!!!";
+                        game::Chessquer winner = Game->Winner();
+                        if (winner == game::Chessquer::white) {
+                            if (Board::isPVE) {
+                                /// TODO
+                            } else {
+                                winnertr = "白子胜";
+                            }
+                        } else if (winner == game::Chessquer::black){
+                            if (Board::isPVE) {
+                                /// TODO
+                            } else {
+                                winnertr = "黑子胜";
+                            }
+                        }
+                        QMessageBox::information(this, title, winnertr, QMessageBox::Ok, QMessageBox::NoButton);
+                    }
+
+                    switch (Game->getGameState()) {
+                    case game::gameState::blackToD:
+                        stateT = (Board::isPVE ? (Board::AIMode == Board::Mode::ComputerBlack ? "人机下" : "该你了")  : "轮到黑子");
+                        break;
+                    case game::gameState::whiteToD:
+                        stateT = (Board::isPVE ? (Board::AIMode == Board::Mode::ComputerWhite? "人机下" : "该你了")  : "轮到白子");
+                        break;
+                    case game::gameState::whiteWin:
+                        stateT = (Board::isPVE ? (Board::AIMode == Board::Mode::ComputerWhite ? "人机赢了" : "你赢了") :"白子胜利");
+                        break;
+                    case game::gameState::blackWin:
+                        stateT = (Board::isPVE ? (Board::AIMode == Board::Mode::ComputerBlack ? "人机赢了" : "你赢了") :"黑子胜利");
+                        break;
+                    default:
+                        stateT = "出BUG了！";
+                        break;
+                    }
+                    Board::ui->label->setText(stateT);
+
+                }
             }
 
-             /// TODO 更新文本提示 黑子 白子
-            QString stateT;
-            switch (Game->getGameState()) {
-            case game::gameState::blackToD:
-                stateT = "轮到黑子";
-                break;
-            case game::gameState::whiteToD:
-                stateT = "轮到白子";
-                break;
-              case game::gameState::whiteWin:
-                stateT = "白子胜利";
-                break;
-               case game::gameState::blackWin:
-                stateT = "黑子胜利";
-                break;
-           default:
-                stateT = "出BUG了！";
-                break;
-            }
-            Board::ui->label->setText(stateT);
+            update();
+
 
         }
 
@@ -219,10 +286,11 @@ void Board::on_restart_clicked()
     QMessageBox::StandardButton result=QMessageBox::question(this, dialtitle, strInfo,
                                                                QMessageBox::Yes|QMessageBox::No );
     if (result == QMessageBox::Yes) {
-        /// TODO
-        /// SAVE IT!!!
         Game->restart();
         update();
+        if (Board::isPVE) {
+            ChessEngine::reset(Board::AIMode == Board::Mode::ComputerBlack ? 0 : 1);
+        }
     }
 
 }
@@ -232,6 +300,9 @@ void Board::on_huiqi_clicked()
 {
     /// TODO 怎么禁止AI 悔棋， 好像不用，因为AI 不会悔棋
     Game->huiqi();
+    if (Board::isPVE) {
+        /// TODO
+    }
     update();
 }
 
@@ -320,3 +391,24 @@ void Board::on_label_linkHovered(const QString &link)
    ///hahaha
 }
 
+void Board::useAIMode(const Board::Mode mode) {
+    Board::isPVE = true;
+    Board::AIMode = mode;
+
+    ui->label->setText((mode == Board::ComputerBlack ? "电脑下" : "轮到你了"));
+
+    /// init AI
+    qDebug() << "初始化AI:" << (mode == Board::ComputerBlack ? "AI黑子" : "AI白子");
+    ChessEngine::beforeStart();
+    ChessEngine::reset(mode);
+
+    /// AI先手，下在天元
+    if (mode == Board::Mode::ComputerBlack) {
+        qDebug() << "AI 先手";
+        Game->MakeMoveHelper(7, 7);
+        Board::NotSave();
+
+        update();
+    }
+
+}

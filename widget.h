@@ -38,12 +38,14 @@ private slots:
 
     void on_load_clicked();
 
+    void on_pve_clicked();
+
 private:
     Ui::Widget *ui;
     /// 为什么不是Ui::
     Board *board;
     fileOpenUI* fileopenboard;
-    void openGame(std::string oldfiles);
+    void openGame(std::string oldfiles, bool isPVE);
     void openGameBoard();
 
 public slots:

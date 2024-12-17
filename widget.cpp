@@ -24,18 +24,26 @@ Widget::~Widget()
     delete ui;
 }
 
+void Widget::on_pve_clicked()
+{
+    /// TODO
+
+    Widget::openGame("", true);
+
+}
+
 void Widget::on_pvp_clicked()
 {
     /// Widget::openGameBoard();
 
-    Widget::openGame("");
+    Widget::openGame("", false);
 }
 
 void Widget::receiveStringSlot(const QString &receivedString)
 {
     // 在这里对接收到的字符串进行处理
     qDebug() << "接收到的文件名：" << receivedString;
-    Widget::openGame(receivedString.toStdString().append(".data"));
+    Widget::openGame(receivedString.toStdString().append(".data"), false);
 }
 
 /// 准备载入残局
@@ -55,7 +63,8 @@ void Widget::on_load_clicked()
         QMessageBox::StandardButton result=QMessageBox::question(this, dialtitle, strInfo,
                                                                    QMessageBox::Yes|QMessageBox::No );
         if (result == QMessageBox::Yes) {
-            Widget::openGame("");
+            /// TODO AI对局打开后按AI走
+            Widget::openGame("", false);
         } else {
             /// TODO
         }
@@ -68,7 +77,7 @@ void Widget::on_load_clicked()
 
 }
 
-void Widget::openGame(std::string oldfiles){
+void Widget::openGame(std::string oldfiles, bool isPVE){
 
     if (oldfiles.size() > 0) {
         board->openGameFile(oldfiles);
@@ -79,6 +88,11 @@ void Widget::openGame(std::string oldfiles){
             this->show();
             board->hide();
         });
+
+        if (isPVE) {
+            board->useAIMode(Board::Mode::ComputerBlack);
+
+        }
 
     }
 
@@ -91,4 +105,7 @@ void Widget::openGameBoard() {
 
     board->show();
 }
+
+
+
 

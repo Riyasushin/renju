@@ -9,17 +9,23 @@ CONFIG += c++17
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+    acsearcher.cpp \
     board.cpp \
+    chessengine.cpp \
     fileopenui.cpp \
     game.cpp \
     main.cpp \
+    possiblepositionmanager.cpp \
     widget.cpp
 
 HEADERS += \
+    acsearcher.h \
     board.h \
+    chessengine.h \
     fileopenui.h \
     game.h \
     grid.h \
+    possiblepositionmanager.h \
     ut-files.h \
     widget.h
 
