@@ -15,7 +15,7 @@
 #include "game.h"
 #include "ut-files.h"
 #include <stdio.h>
-#include "chessengine.h"
+#include "chessai.h"
 
 /// 棋盘界面
 
@@ -72,6 +72,7 @@ private:
     void mouseReleaseEvent(QMouseEvent *event);
     void closeEvent(QCloseEvent *event);
     void saveFile();
+    void updateLabelText();
     QPainter *painter;
     game *Game;
 
@@ -120,6 +121,9 @@ private:
     std::string filename = "";
 
 
+    QString stateT = "黑子先下";
+
+
 /**
  * AI相关操作
  */
@@ -133,6 +137,12 @@ public:
 
 signals:
     void goBackStart();
+
+private:
+    /// 画图的图片
+    QPixmap BLACKCHESSQUER;
+    QPixmap WHITECHESSQUER;
+    QPixmap BACKGROUND;
 
 
 };

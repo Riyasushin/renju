@@ -1,5 +1,5 @@
 
-#include "acsearcher.h"
+#include "ACSearcher.h"
 
 #include <cassert>
 
@@ -7,7 +7,7 @@
 ACSearcher::ACSearcher()
     :maxState(0)
 {
-    //³õÊ¼»¯¸ù½Úµã
+    //åˆå§‹åŒ–æ ¹èŠ‚ç‚¹
     AddState(-1, 'a');
     nodes[0].fail = -1;
 
@@ -28,13 +28,13 @@ void ACSearcher::BuildGotoTable() {
 
     unsigned int i, j;
     for (i = 0; i < paterns.size(); i++) {
-        //´Ó¸ù½Úµã¿ªÊ¼
+        //ä»æ ¹èŠ‚ç‚¹å¼€å§‹
         int currentIndex = 0;
         for (j = 0; j < paterns[i].size(); j++) {
             if (nodes[currentIndex].sons.find(paterns[i][j]) == nodes[currentIndex].sons.end()) {
                 nodes[currentIndex].sons[paterns[i][j]] = ++maxState;
 
-                //Éú³ÉĞÂ½Úµã
+                //ç”Ÿæˆæ–°èŠ‚ç‚¹
                 AddState(currentIndex, paterns[i][j]);
                 currentIndex = maxState;
             }
@@ -50,10 +50,10 @@ void ACSearcher::BuildGotoTable() {
 void ACSearcher::BuildFailTable() {
     assert(nodes.size());
 
-    //ÖĞ¼ä½ÚµãÊÕ¼¯Æ÷
+    //ä¸­é—´èŠ‚ç‚¹æ”¶é›†å™¨
     vector<int> midNodesIndex;
 
-    //¸øµÚÒ»²ãµÄ½ÚµãÉèÖÃfailÎª0£¬²¢°ÑµÚ¶ş²ã½Úµã¼ÓÈëµ½midStateÀï
+    //ç»™ç¬¬ä¸€å±‚çš„èŠ‚ç‚¹è®¾ç½®failä¸º0ï¼Œå¹¶æŠŠç¬¬äºŒå±‚èŠ‚ç‚¹åŠ å…¥åˆ°midStateé‡Œ
     ACNode root = nodes[0];
 
     map<char, int>::iterator iter1, iter2;
@@ -61,13 +61,13 @@ void ACSearcher::BuildFailTable() {
         nodes[iter1->second].fail = 0;
         ACNode &currentNode = nodes[iter1->second];
 
-        //ÊÕ¼¯µÚÈı²ã½Úµã
+        //æ”¶é›†ç¬¬ä¸‰å±‚èŠ‚ç‚¹
         for (iter2 = currentNode.sons.begin(); iter2 != currentNode.sons.end(); iter2++) {
             midNodesIndex.push_back(iter2->second);
         }
     }
 
-    //¹ã¶ÈÓÅÏÈ±éÀú
+    //å¹¿åº¦ä¼˜å…ˆéå†
     while (midNodesIndex.size()) {
         vector<int> newMidNodesIndex;
 
@@ -75,16 +75,16 @@ void ACSearcher::BuildFailTable() {
         for (i = 0; i < midNodesIndex.size(); i++) {
             ACNode &currentNode = nodes[midNodesIndex[i]];
 
-            //ÒÔÏÂÑ­»·ÎªÑ°ÕÒµ±Ç°½ÚµãµÄfailÖµ
+            //ä»¥ä¸‹å¾ªç¯ä¸ºå¯»æ‰¾å½“å‰èŠ‚ç‚¹çš„failå€¼
             int currentFail = nodes[currentNode.parent].fail;
             while (true) {
                 ACNode &currentFailNode = nodes[currentFail];
 
                 if (currentFailNode.sons.find(currentNode.ch) != currentFailNode.sons.end()) {
-                    //³É¹¦ÕÒµ½¸Ã½ÚµãµÄfailÖµ
+                    //æˆåŠŸæ‰¾åˆ°è¯¥èŠ‚ç‚¹çš„failå€¼
                     currentNode.fail = currentFailNode.sons.find(currentNode.ch)->second;
 
-                    //ºó×º°üº¬
+                    //åç¼€åŒ…å«
                     if (nodes[currentNode.fail].output.size()) {
                         currentNode.output.insert(currentNode.output.end(), nodes[currentNode.fail].output.begin(), nodes[currentNode.fail].output.end());
                     }
@@ -95,16 +95,16 @@ void ACSearcher::BuildFailTable() {
                     currentFail = currentFailNode.fail;
                 }
 
-                //Èç¹ûÊÇ¸ù½Úµã
+                //å¦‚æœæ˜¯æ ¹èŠ‚ç‚¹
                 if (currentFail == -1) {
                     currentNode.fail = 0;
                     break;
                 }
             }
 
-            //ÊÕ¼¯ÏÂÒ»²ã½Úµã
+            //æ”¶é›†ä¸‹ä¸€å±‚èŠ‚ç‚¹
             for (iter1 = currentNode.sons.begin(); iter1 != currentNode.sons.end(); iter1++) {
-                //ÊÕ¼¯ÏÂÒ»²ã½Úµã
+                //æ”¶é›†ä¸‹ä¸€å±‚èŠ‚ç‚¹
                 newMidNodesIndex.push_back(iter1->second);
             }
         }
@@ -115,24 +115,24 @@ void ACSearcher::BuildFailTable() {
 vector<int> ACSearcher::ACSearch(const string& text) {
     vector<int> result;
 
-    //³õÊ¼»¯Îª¸ù½Úµã
+    //åˆå§‹åŒ–ä¸ºæ ¹èŠ‚ç‚¹
     int currentIndex = 0;
 
     unsigned int i;
     map<char, int>::iterator tmpIter;
     for (i = 0; i < text.size();) {
-        //Ë³×ÅtrieÊ÷²éÕÒ
+        //é¡ºç€trieæ ‘æŸ¥æ‰¾
         if ((tmpIter = nodes[currentIndex].sons.find(text[i])) != nodes[currentIndex].sons.end()) {
             currentIndex = tmpIter->second;
             i++;
         }
         else {
-            //Ê§ÅäµÄÇé¿ö
+            //å¤±é…çš„æƒ…å†µ
             while (nodes[currentIndex].fail != -1 && nodes[currentIndex].sons.find(text[i]) == nodes[currentIndex].sons.end()) {
                 currentIndex = nodes[currentIndex].fail;
             }
 
-            //Èç¹ûÃ»ÓĞ³É¹¦ÕÒµ½ºÏÊÊµÄfail
+            //å¦‚æœæ²¡æœ‰æˆåŠŸæ‰¾åˆ°åˆé€‚çš„fail
             if (nodes[currentIndex].sons.find(text[i]) == nodes[currentIndex].sons.end()) {
                 i++;
             }

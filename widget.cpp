@@ -9,6 +9,9 @@ Widget::Widget(QWidget *parent)
     ui->setupUi(this);
     this->setWindowTitle("五子棋v1.12.0");
 
+    ChessAI::beforeStart();
+
+
     board = new Board;
 
     connect(board, &Board::goBackStart, this, [=](){
@@ -90,7 +93,29 @@ void Widget::openGame(std::string oldfiles, bool isPVE){
         });
 
         if (isPVE) {
-            board->useAIMode(Board::Mode::ComputerBlack);
+            /// 提示
+            // QString dialtitle = "prompt";
+            // QString strInfo = "请选择谁执黑";
+
+
+            // qDebug() << "试图让玩家选择谁；来执黑";
+            // // 显示消息框并获取用户点击的结果
+            // QMessageBox::StandardButton result=QMessageBox::question(this, dialtitle, strInfo,
+            //                                                            QMessageBox::Yes|QMessageBox::No );
+
+            // // 根据用户点击的结果进行后续处理，这里简单示例，可按需扩展
+            // if (result ==  QMessageBox::Yes)
+            // {
+            //     board->useAIMode(Board::Mode::ComputerWhite);
+            //     qDebug() << "玩家选择自己黑";
+            // }
+            // else
+            // {
+            //     board->useAIMode(Board::Mode::ComputerBlack);
+            //     qDebug() << "玩家选择AI 黑";
+            // }
+            qDebug() << "玩家选择 AI白色";
+            board->useAIMode(Board::Mode::ComputerWhite);
 
         }
 

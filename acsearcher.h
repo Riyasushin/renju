@@ -1,3 +1,5 @@
+#ifndef ACSEARCHER_H
+#define ACSEARCHER_H
 #pragma once
 
 #include <string>
@@ -5,7 +7,7 @@
 #include <map>
 using namespace std;
 
-//trieÊ÷½Úµã
+//trieæ ‘èŠ‚ç‚¹
 struct ACNode {
     ACNode(int p, char c)
         :parent(p),
@@ -21,7 +23,7 @@ struct ACNode {
     int parent;
 };
 
-//ACËã·¨Àà
+//ACç®—æ³•ç±»
 class ACSearcher
 {
 public:
@@ -31,13 +33,15 @@ public:
     void LoadPattern(const vector<string>& paterns);
     void BuildGotoTable();
     void BuildFailTable();
-    vector<int> ACSearch(const string& text);           //·µ»ØÆ¥Åäµ½µÄÄ£Ê½µÄË÷Òı
+    vector<int> ACSearch(const string& text);           //è¿”å›åŒ¹é…åˆ°çš„æ¨¡å¼çš„ç´¢å¼•
 
 private:
-    int maxState;                                       //×î´ó×´Ì¬Êı
-    vector<ACNode> nodes;                               //trieÊ÷
-    vector<string> paterns;                             //ĞèÒªÆ¥ÅäµÄÄ£Ê½
+    int maxState;                                       //æœ€å¤§çŠ¶æ€æ•°
+    vector<ACNode> nodes;                               //trieæ ‘
+    vector<string> paterns;                             //éœ€è¦åŒ¹é…çš„æ¨¡å¼
 
-    void AddState(int parent, char ch);                                    //³õÊ¼»¯ĞÂ×´Ì¬
+    void AddState(int parent, char ch);                                    //åˆå§‹åŒ–æ–°çŠ¶æ€
 };
 
+
+#endif // ACSEARCHER_H

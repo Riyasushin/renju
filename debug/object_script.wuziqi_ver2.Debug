@@ -1,0 +1,10 @@
+debug/board.o
+debug/chessai.o
+debug/fileopenui.o
+debug/game.o
+debug/main.o
+debug/widget.o
+debug/qrc_res.o
+debug/moc_board.o
+debug/moc_fileopenui.o
+debug/moc_widget.o

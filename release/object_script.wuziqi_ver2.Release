@@ -1,0 +1,10 @@
+release/board.o
+release/chessai.o
+release/fileopenui.o
+release/game.o
+release/main.o
+release/widget.o
+release/qrc_res.o
+release/moc_board.o
+release/moc_fileopenui.o
+release/moc_widget.o

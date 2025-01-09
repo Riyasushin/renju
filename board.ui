@@ -27,6 +27,9 @@
     <pointsize>20</pointsize>
    </font>
   </property>
+  <property name="mouseTracking">
+   <bool>false</bool>
+  </property>
   <property name="windowTitle">
    <string>Form</string>
   </property>

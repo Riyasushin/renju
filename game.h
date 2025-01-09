@@ -8,8 +8,9 @@
 /// 提供接口，供悔棋操作
 #include<vector>
 #include <string>
-#include "grid.h"
+
 #include <QDebug>
+#include "chessai.h"
 
 /// fill the move
 #define PUSHINGARBAGE {-1, -1, -1, -1, -1, -1, -1, -1}
@@ -74,6 +75,13 @@ public:
      */
     void MakeMoveHelper(const size_t x, const size_t y);
 
+    /**
+     * @brief 判断是不是禁手
+     * @param x
+     * @param y
+     * @return
+     */
+    bool reachInValid(const int x, const int y);
     /**
      * @brief Winner
      *      一定在判定游戏结束后才能调用,这里没有判定游戏打没打完
@@ -148,14 +156,11 @@ private:
      * 这里不能size_t
      */
     bool inbound(const int x, const int y);
-    /**
-     * @brief islegal
-     * 禁手判断
-     */
-    bool islegal(const size_t x, const size_t y) const;
+
 
     const int steps[4][2] = { {0, 1}, {1, 1}, {1, 0}, {1, -1}};
 
+    ACAutm ac;
 
 };
 

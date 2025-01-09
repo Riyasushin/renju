@@ -15,6 +15,11 @@ Board::Board(QWidget *parent)
     /// START THE GAME
     Game = new game;
 
+    /// 干掉不好看的上面导航栏
+    this->setWindowFlags(Qt::FramelessWindowHint);
+    BLACKCHESSQUER = QPixmap(":/black_chess.png");
+    WHITECHESSQUER = QPixmap(":/white_chess.png");
+    BACKGROUND = QPixmap(":/background.jpg");
     //game->MakeMove(true, 0, 0);
     //game->MakeMove(false, 0, 1);
 
@@ -33,6 +38,11 @@ void Board::paintEvent(QPaintEvent *event){
     painter = new QPainter;
     painter->begin(this);
 
+
+    /// draw background
+    const int LEFT = MARGEIN / 2, WID = MARGEIN + WIDTH * LINE;
+    painter->drawPixmap(LEFT, LEFT, WID, WID, BACKGROUND);
+
     /// draw lines
     for (int i = 0; i <= LINE; ++i) {
         painter->drawLine(x, y + WIDTH * i, x + WIDTH * LINE, y + WIDTH * i);
@@ -49,12 +59,17 @@ void Board::paintEvent(QPaintEvent *event){
 
          //// TODO 把画棋子封装成小函数
         if (elem.color == game::white) { /// BAO LOU JIE KOU LE
-            painter->setBrush(QBrush(Qt::white, Qt::SolidPattern));
-            painter->drawEllipse(x + WIDTH * x1 - R, y + WIDTH * y1 - R, R * 2, R * 2);
+
+            painter->drawPixmap(x + WIDTH * x1 - R, y + WIDTH * y1 - R, R * 2, R * 2, WHITECHESSQUER);
+
+            // painter->setBrush(QBrush(Qt::white, Qt::SolidPattern));
+            // painter->drawEllipse(x + WIDTH * x1 - R, y + WIDTH * y1 - R, R * 2, R * 2);
 
         } else {
-            painter->setBrush(QBrush(Qt::black, Qt::SolidPattern));
-            painter->drawEllipse(x + WIDTH * x1 - R, y + WIDTH * y1 - R, R * 2, R * 2);
+            painter->drawPixmap(x + WIDTH * x1 - R, y + WIDTH * y1 - R, R * 2, R * 2, BLACKCHESSQUER);
+
+            // painter->setBrush(QBrush(Qt::black, Qt::SolidPattern));
+            // painter->drawEllipse(x + WIDTH * x1 - R, y + WIDTH * y1 - R, R * 2, R * 2);
         }
     }
 
@@ -82,39 +97,39 @@ void Board::paintEvent(QPaintEvent *event){
 /// TODO
 void Board::mouseMoveEvent(QMouseEvent *event) {
 
-    if (Game->hasDecideWinner()) {
-        Board::nextMove.x = -1;
-        Board::nextMove.y = -1;
-        return;
-    }
+    // if (Game->hasDecideWinner()) {
+    //     Board::nextMove.x = -1;
+    //     Board::nextMove.y = -1;
+    //     return;
+    // }
 
-    int mouseX = event->x(), mouseY = event->y();
+    // int mouseX = event->x(), mouseY = event->y();
 
-    if (mouseX >= MARGEIN / 2 && mouseX <= MARGEIN + WIDTH * LINE + MARGEIN / 2
-        && mouseY >= MARGEIN / 2 && mouseY <= MARGEIN + WIDTH * LINE + MARGEIN / 2) {
+    // if (mouseX >= MARGEIN / 2 && mouseX <= MARGEIN + WIDTH * LINE + MARGEIN / 2
+    //     && mouseY >= MARGEIN / 2 && mouseY <= MARGEIN + WIDTH * LINE + MARGEIN / 2) {
 
-        qDebug() << mouseX << " " << mouseY;
-        auto [absX, absY] = Board::getPointAbsLocation(mouseX, mouseY);
+    //     qDebug() << mouseX << " " << mouseY;
+    //     auto [absX, absY] = Board::getPointAbsLocation(mouseX, mouseY);
 
-        bool canMove = Game->canMakeMove(absX, absY);
+    //     bool canMove = Game->canMakeMove(absX, absY);
 
-        /// TODO bug!!!
-        if (canMove) {
-            /// 能下棋，写成可行的
-            /// 已经排除了棋局结束的情况，所有只有白瞎或黑瞎的情况
-            Board::nextMove.type = (Game->getGameState() == game::gameState::whiteToD ? game::Chessquer::white : game::Chessquer::black);
+    //     /// TODO bug!!!
+    //     if (canMove) {
+    //         /// 能下棋，写成可行的
+    //         /// 已经排除了棋局结束的情况，所有只有白瞎或黑瞎的情况
+    //         Board::nextMove.type = (Game->getGameState() == game::gameState::whiteToD ? game::Chessquer::white : game::Chessquer::black);
 
-        } else {
-            /// 不能下棋,写成红色的叉号
-            Board::nextMove.type = game::Chessquer::invalid;
-        }
+    //     } else {
+    //         /// 不能下棋,写成红色的叉号
+    //         Board::nextMove.type = game::Chessquer::invalid;
+    //     }
 
-        Board::nextMove.x = absX;
-        Board::nextMove.y = absY;
+    //     Board::nextMove.x = absX;
+    //     Board::nextMove.y = absY;
 
-        update();
+    //     update();
 
-    }
+    // }
 
 
 }
@@ -137,31 +152,13 @@ void Board::mouseReleaseEvent(QMouseEvent *event) {
 
         bool canMove = Game->canMakeMove(absX, absY);
         if (canMove) {
-
+            qDebug() << mouseX << " " << mouseY << "could make move";
             Board::nextMove = {-1, -1, game::Chessquer::non};
             Game->MakeMoveHelper(absX, absY);
             Board::NotSave();
 
             /// 文本修改，提示轮到谁下
-            QString stateT;
-            switch (Game->getGameState()) {
-            case game::gameState::blackToD:
-                stateT = (Board::isPVE ? (Board::AIMode == Board::Mode::ComputerBlack ? "人机下" : "该你了")  : "轮到黑子");
-                break;
-            case game::gameState::whiteToD:
-                stateT = (Board::isPVE ? (Board::AIMode == Board::Mode::ComputerWhite? "人机下" : "该你了")  : "轮到白子");
-                break;
-              case game::gameState::whiteWin:
-                stateT = (Board::isPVE ? (Board::AIMode == Board::Mode::ComputerWhite ? "人机赢了" : "你赢了") :"白子胜利");
-                break;
-               case game::gameState::blackWin:
-                stateT = (Board::isPVE ? (Board::AIMode == Board::Mode::ComputerBlack ? "人机赢了" : "你赢了") :"黑子胜利");
-                break;
-           default:
-                stateT = "出BUG了！";
-                break;
-            }
-            Board::ui->label->setText(stateT);
+            Board::updateLabelText();
 
             update();
 
@@ -183,6 +180,8 @@ void Board::mouseReleaseEvent(QMouseEvent *event) {
                     } else {
                         winnertr = "黑子胜";
                     }
+                } else if (winner == game::Chessquer::non) {
+                    winnertr = "势均力敌";
                 }
                 QMessageBox::information(this, title, winnertr, QMessageBox::Ok, QMessageBox::NoButton);
             } else {
@@ -192,9 +191,9 @@ void Board::mouseReleaseEvent(QMouseEvent *event) {
                     /// 装模作样暂停一秒 TODO
 
 
-                    ChessEngine::nextStep(absX, absY);
+                    ChessAI::nextStep(absX, absY);
 
-                    ChessEngine::Position p = ChessEngine::getLastPosition();
+                    Point p = ChessAI::getLastPoint();
 
                     /// TODO 复制粘贴不好
                     Game->MakeMoveHelper(p.x, p.y);
@@ -220,24 +219,8 @@ void Board::mouseReleaseEvent(QMouseEvent *event) {
                         QMessageBox::information(this, title, winnertr, QMessageBox::Ok, QMessageBox::NoButton);
                     }
 
-                    switch (Game->getGameState()) {
-                    case game::gameState::blackToD:
-                        stateT = (Board::isPVE ? (Board::AIMode == Board::Mode::ComputerBlack ? "人机下" : "该你了")  : "轮到黑子");
-                        break;
-                    case game::gameState::whiteToD:
-                        stateT = (Board::isPVE ? (Board::AIMode == Board::Mode::ComputerWhite? "人机下" : "该你了")  : "轮到白子");
-                        break;
-                    case game::gameState::whiteWin:
-                        stateT = (Board::isPVE ? (Board::AIMode == Board::Mode::ComputerWhite ? "人机赢了" : "你赢了") :"白子胜利");
-                        break;
-                    case game::gameState::blackWin:
-                        stateT = (Board::isPVE ? (Board::AIMode == Board::Mode::ComputerBlack ? "人机赢了" : "你赢了") :"黑子胜利");
-                        break;
-                    default:
-                        stateT = "出BUG了！";
-                        break;
-                    }
-                    Board::ui->label->setText(stateT);
+                   /// TODO
+                    Board::updateLabelText();
 
                 }
             }
@@ -280,6 +263,7 @@ std::pair<size_t, size_t> Board::getPointAbsLocation(int mouseX, int mouseY) {
 /// 重新开始对局
 void Board::on_restart_clicked()
 {
+
     /// 友好提示框
     QString dialtitle = "Warning";
     QString strInfo = "本操作不可撤销，确定重新开始吗";
@@ -289,7 +273,7 @@ void Board::on_restart_clicked()
         Game->restart();
         update();
         if (Board::isPVE) {
-            ChessEngine::reset(Board::AIMode == Board::Mode::ComputerBlack ? 0 : 1);
+            ChessAI::reset(Board::AIMode == Board::Mode::ComputerBlack ? 0 : 1);
         }
     }
 
@@ -298,11 +282,19 @@ void Board::on_restart_clicked()
 
 void Board::on_huiqi_clicked()
 {
-    /// TODO 怎么禁止AI 悔棋， 好像不用，因为AI 不会悔棋
+    /// TODO 怎么禁止人在AI下棋时候悔棋
+    if (Game->getGameData().size() < 2) {
+        QMessageBox::information(this, "title", "布什葛萌", QMessageBox::Ok, QMessageBox::NoButton);
+        return;
+    }
     Game->huiqi();
+    Game->huiqi();
+
     if (Board::isPVE) {
         /// TODO
+        ChessAI::takeBack();
     }
+    Board::updateLabelText();
     update();
 }
 
@@ -312,6 +304,28 @@ void Board::on_save_clicked()
     Board::saveFile();
 }
 
+void Board::updateLabelText() {
+
+    switch (Game->getGameState()) {
+    case game::gameState::blackToD:
+        stateT = (Board::isPVE ? (Board::AIMode == Board::Mode::ComputerBlack ? "人机下" : "该你了")  : "轮到黑子");
+        break;
+    case game::gameState::whiteToD:
+        stateT = (Board::isPVE ? (Board::AIMode == Board::Mode::ComputerWhite? "人机下" : "该你了")  : "轮到白子");
+        break;
+    case game::gameState::whiteWin:
+        stateT = (Board::isPVE ? (Board::AIMode == Board::Mode::ComputerWhite ? "人机赢了" : "你赢了") :"白子胜利");
+        break;
+    case game::gameState::blackWin:
+        stateT = (Board::isPVE ? (Board::AIMode == Board::Mode::ComputerBlack ? "人机赢了" : "你赢了") :"黑子胜利");
+        break;
+    default:
+        stateT = "出BUG了！";
+        break;
+    }
+    Board::ui->label->setText(stateT);
+    qDebug() << "update label text to:" << stateT;
+}
 
 /// TODO : 怎么吧文件名传过来
 void Board::openGameFile(const std::string filename) {
@@ -320,6 +334,7 @@ void Board::openGameFile(const std::string filename) {
 
     if (fileutils::readFromFile(filename, his)) {
         Game->loadDataToGame(his);
+        Board::updateLabelText();
         update();
         this->filename = filename;
     } else {
@@ -395,20 +410,22 @@ void Board::useAIMode(const Board::Mode mode) {
     Board::isPVE = true;
     Board::AIMode = mode;
 
-    ui->label->setText((mode == Board::ComputerBlack ? "电脑下" : "轮到你了"));
+
 
     /// init AI
     qDebug() << "初始化AI:" << (mode == Board::ComputerBlack ? "AI黑子" : "AI白子");
-    ChessEngine::beforeStart();
-    ChessEngine::reset(mode);
-
+    ChessAI::reset(mode);
+    ui->label->setText((mode == Board::ComputerBlack ? "电脑下" : "轮到你了"));
     /// AI先手，下在天元
     if (mode == Board::Mode::ComputerBlack) {
-        qDebug() << "AI 先手";
+
         Game->MakeMoveHelper(7, 7);
         Board::NotSave();
+        /// TODO 变成小函数
+        updateLabelText();
+        qDebug() << "AI 先手";
 
-        update();
     }
+    update();
 
 }
